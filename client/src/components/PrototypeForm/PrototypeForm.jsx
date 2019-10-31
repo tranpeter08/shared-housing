@@ -1,194 +1,239 @@
-import React from 'react';
+import React, { useState } from 'react';
+import {
+  FormControl,
+  FormLabel,
+  RadioGroup,
+  Radio,
+  FormControlLabel,
+  Button,
+  Input,
+  Container,
+  Paper,
+  Typography,
+} from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+import clsx from 'clsx';
 
-class PrototypeForm extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      'pet-kind': '',
-      children: '',
-      age: '',
-    };
+const useStyles = makeStyles(theme => ({
+  container: {
+    display: 'flex',
+    flexFlow: 'column',
+    alignItems: 'center',
+    backgroundColor: theme.palette.grey[100],
+    height: '100%',
+  },
+  form: {
+    margin: theme.spacing(4),
+    width: '100%',
+    maxWidth: 600,
+  },
+  paper: {
+    padding: theme.spacing(4),
+  },
+  heading: {
+    textAlign: 'center',
+  },
+  control: {
+    marginTop: theme.spacing(4),
+  },
+  label: theme.typography.h5,
+  input: {
+    'label + &': {
+      marginTop: theme.spacing(1),
+      border: '1px solid #ced4da',
+      borderRadius: 4,
+      paddingLeft: theme.spacing(1),
+    },
+  },
+  numberInput: {
+    width: 80,
+  },
+  button: {
+    marginTop: theme.spacing(4),
+  },
+  subQuestion: {
+    paddingLeft: theme.spacing(4),
+  },
+}));
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
+const PrototypeForm = () => {
+  const classes = useStyles();
 
-  handleSubmit(e) {
+  const formDefaults = {
+    age: '',
+    hasChildren: '',
+    children: '',
+    hasPets: '',
+    pets: '',
+    isOutgoing: '',
+    likeMusic: '',
+  };
+
+  const [formState, setFormState] = useState(formDefaults);
+
+  const handleChange = e => {
+    const { name, type, value } = e.target;
+
+    if (type === 'checkbox') {
+      setFormState({ ...formState, [name]: !formState[name] });
+      return;
+    }
+
+    setFormState({ ...formState, [name]: value });
+  };
+
+  const handleSubmit = e => {
     e.preventDefault();
-    console.log(this.state);
-  }
+    console.log('formState:', formState);
+  };
 
-  handleChange(e) {
-    this.setState({ [e.target.name]: e.target.value });
-  }
+  const radioConfig = [['Yes', 'true'], ['No', 'false']];
 
-  render() {
-    const {
-      'have-pets': havePets,
-      'pet-kind': petKind,
-      age,
-      'have-children': haveChildren,
-      children,
-    } = this.state;
+  const radioInputs = config => {
+    return config.map(param => (
+      <FormControlLabel
+        key={param[0]}
+        label={param[0]}
+        value={param[1]}
+        control={<Radio color="primary" />}
+      />
+    ));
+  };
 
-    return (
-      <form style={{ padding: '20px' }} onSubmit={this.handleSubmit}>
-        <label htmlFor="age">
-          What is your age?
-          <br />
-          <input
-            onChange={this.handleChange}
-            id="age"
-            name="age"
-            value={age}
-            type="number"
-          />
-        </label>
+  return (
+    <Container className={classes.container}>
+      <form className={classes.form} onSubmit={handleSubmit}>
+        <Paper className={classes.paper}>
+          <Typography variant="h4" component="h2" className={classes.heading}>
+            Tell Us About Yourself!
+          </Typography>
 
-        <p>Do you have pets? </p>
+          <FormControl className={classes.control} fullWidth>
+            <FormLabel htmlFor="age" className={classes.label}>
+              What is your age?
+            </FormLabel>
+            <Input
+              className={clsx(classes.input, classes.numberInput)}
+              id="age"
+              name="age"
+              onChange={handleChange}
+              type="number"
+              value={formState.age}
+              required
+              disableUnderline
+            />
+          </FormControl>
 
-        <label htmlFor="pets-yes">
-          Yes
-          <input
-            onChange={this.handleChange}
-            id="pets-yes"
-            name="have-pets"
-            type="radio"
-            value="Yes"
-          />
-        </label>
-        <br />
+          <FormControl className={classes.control}>
+            <FormLabel className={classes.label}>
+              Do you have any children?
+            </FormLabel>
+            <RadioGroup
+              aria-label="Do you have any children"
+              name="hasChildren"
+              value={formState.hasChildren}
+              onChange={handleChange}
+            >
+              {radioInputs(radioConfig)}
+            </RadioGroup>
+          </FormControl>
 
-        <label htmlFor="pets-no">
-          No
-          <input
-            onChange={this.handleChange}
-            id="pets-no"
-            name="have-pets"
-            type="radio"
-            value="No"
-          />
-        </label>
-        <br />
-
-        {havePets === 'Yes' && (
-          <React.Fragment>
-            <br />
-            <label htmlFor="pet">
-              What kind of pets?
-              <br />
-              <input
-                id="pet"
-                onChange={this.handleChange}
-                value={petKind}
-                name="pet-kind"
-                type="text"
-              />
-            </label>
-            <br />
-          </React.Fragment>
-        )}
-
-        <p>Do you have children? </p>
-
-        <label htmlFor="children-yes">
-          Yes
-          <input
-            onChange={this.handleChange}
-            id="children-yes"
-            name="have-children"
-            type="radio"
-            value="Yes"
-          />
-        </label>
-        <br />
-
-        <label htmlFor="children-no">
-          No
-          <input
-            onChange={this.handleChange}
-            id="children-no"
-            name="have-children"
-            type="radio"
-            value="No"
-          />
-        </label>
-        <br />
-
-        {haveChildren === 'Yes' && (
-          <React.Fragment>
-            <br />
-            <label htmlFor="children">
-              Number of children?
-              <br />
-              <input
+          {formState.hasChildren === 'true' && (
+            <FormControl
+              className={clsx(classes.control, classes.subQuestion)}
+              fullWidth
+            >
+              <FormLabel htmlFor="children" className={classes.label}>
+                How many children?
+              </FormLabel>
+              <Input
+                className={clsx(classes.input, classes.numberInput)}
                 id="children"
-                onChange={this.handleChange}
-                value={children}
                 name="children"
+                onChange={handleChange}
                 type="number"
+                required
+                disableUnderline
               />
-            </label>
-            <br />
-          </React.Fragment>
-        )}
+            </FormControl>
+          )}
 
-        <p>Are you outgoing?</p>
+          <FormControl className={classes.control} fullWidth>
+            <FormLabel className={classes.label}>
+              Do you have any pets?
+            </FormLabel>
+            <RadioGroup
+              aria-label="Do you have any pets?"
+              name="hasPets"
+              value={formState.hasPets}
+              onChange={handleChange}
+              required
+            >
+              {radioInputs(radioConfig)}
+            </RadioGroup>
+          </FormControl>
 
-        <label htmlFor="outgoing-yes">
-          Yes
-          <input
-            onChange={this.handleChange}
-            id="is-outgoing-yes"
-            name="is-outgoing"
-            type="radio"
-            value="Yes"
-          />
-        </label>
-        <br />
+          {formState.hasPets === 'true' && (
+            <FormControl
+              className={clsx(classes.control, classes.subQuestion)}
+              fullWidth
+            >
+              <FormLabel htmlFor="petKind" className={classes.label}>
+                What kind of pets?
+              </FormLabel>
+              <Input
+                className={classes.input}
+                id="pets"
+                name="pets"
+                onChange={handleChange}
+                type="text"
+                required
+                disableUnderline
+              />
+            </FormControl>
+          )}
 
-        <label htmlFor="is-outgoing-no">
-          No
-          <input
-            onChange={this.handleChange}
-            id="is-outgoing-no"
-            name="is-outgoing"
-            type="radio"
-            value="No"
-          />
-        </label>
-        <br />
+          <FormControl className={classes.control} fullWidth>
+            <FormLabel className={classes.label}>Are you outgoing?</FormLabel>
+            <RadioGroup
+              aria-label="Are you out going?"
+              name="isOutgoing"
+              value={formState.isOutgoing}
+              onChange={handleChange}
+              required
+            >
+              {radioInputs(radioConfig)}
+            </RadioGroup>
+          </FormControl>
 
-        <p>Do you like music?</p>
-        <label htmlFor="music-yes">
-          Yes
-          <input
-            id="music-yes"
-            onChange={this.handleChange}
-            name="music"
-            type="radio"
-            value="Yes"
-          />
-        </label>
-        <br />
+          <FormControl className={classes.control} fullWidth>
+            <FormLabel className={classes.label}>
+              Do you like loud music?
+            </FormLabel>
+            <RadioGroup
+              aria-label="Do you like music?"
+              name="likeMusic"
+              value={formState.likeMusic}
+              onChange={handleChange}
+              required
+            >
+              {radioInputs(radioConfig)}
+            </RadioGroup>
+          </FormControl>
 
-        <label htmlFor="music-no">
-          No
-          <input
-            id="music-no"
-            onChange={this.handleChange}
-            name="music"
-            type="radio"
-            value="no"
-          />
-        </label>
-        <br />
-        <br />
-
-        <button type="submit">Submit</button>
+          <Button
+            className={classes.button}
+            variant="contained"
+            color="primary"
+            type="submit"
+            fullWidth
+          >
+            Submit
+          </Button>
+        </Paper>
       </form>
-    );
-  }
-}
+    </Container>
+  );
+};
 
 export default PrototypeForm;
